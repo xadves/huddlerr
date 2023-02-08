@@ -1,0 +1,293 @@
+<html>
+    <head>
+        <script src="/coach/res/axios.min.js"></script>
+        <link rel="stylesheet" href="/coach/res/font-awesome.min.css">
+        <link rel="stylesheet" href="/coach/res/bulma.min.css">
+        <link href="/coach/res/bulma-switch.min.css" rel="stylesheet"></link>
+        <title>
+            Huddlerr Scoreboard
+        </title>
+    </head>
+    <body>
+        <div class="container">
+
+            <div class="columns">
+                
+                <div class="column" id="control-panel">
+                    <a class="button" href="#" onclick="testButton()">Choose Session</a>
+                    <a id="refreshGameButton" class="button" href="#" onclick="openSavedGame()">Refresh Game</a>
+                </div>
+
+                <div class="column">
+                    <div id="control-panel" class="column has-text-centered">
+                        <div class="field">
+                        <input id="autoUpdateToggle" type="checkbox" name="autoUpdateToggle" class="switch is-medium is-success"  onchange="changeUpdateTimer()" checked>
+                        <label for="autoUpdateToggle">Auto Refresh Game</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+
+            <div class="columns is-centered is-vcentered">
+
+                <div class="column box has-text-centered">
+
+                    <h1 class="title is-2">
+
+                        Game Clock: <span class="" id="gameClock">00:00</span>
+
+                    </h1>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="columns is-centered">
+                <div class="column box has-text-centered">
+                    <h1 class="title is-2">
+                        Game Score: <span id="gameScore">0 - 0</span>
+                    </h1>
+                </div>
+            </div>
+
+            <hr>
+
+            <table id="" class="table is-fullwidth has-text-centered">
+                <thead></thead>
+                <tbody id="gameAuditLog"></tbody>
+             
+            </table>
+
+        </div>
+
+    </body>
+
+</html>
+
+<script src="./js/pocketbase.umd.js"></script>
+
+<script src="./js/pbControls.js"></script>
+
+<script src="./js/commonControls.js"></script>
+<script src="./js/spinner.component.js"></script>
+
+<script>
+
+    // Global Variables
+
+    var newGameScore = {"home":0, "away":0, "display":document.getElementById("gameScore")};
+    var gameClock = {"time": 0, "display": document.getElementById("gameClock")};
+    var masterAuditLog = [];
+    var refreshTime = 5000;
+    
+    var session = {"session": getSession()};
+
+    session.settings = "./sessions/" + session.session + "-settings.json";
+    session.gamedata = "./sessions/" + session.session + "-gamedata.json";
+
+    var players = [];
+    retrievePlayers(players);
+
+    function testButton(){
+        alert("Button not implemented yet");
+    }
+
+
+    var updateGame = setInterval(() => openSavedGame(), refreshTime);
+
+    function retrievePlayers(masterPlayers){
+
+        // TODO: For loop to clear the list
+
+        data =[]; // Do I need this?
+        axios.get(session.settings + "?token=" + uuidv3(), [], {
+        headers: {
+        'Content-Type': 'text/json'
+        }})
+        .then((response) => {
+
+            response.data.players.forEach((obj) => {
+                var id = obj.id;
+                var name = obj.name;
+                masterPlayers[id] = {"id":id,"name":name};
+            })
+        });
+    }
+
+
+    /*
+
+    TODO: Go through and make a library of common functions
+    TODO: Import Players from the settings file, this should be sessioned
+    TODO: Check for changes, not a full rebuild every time
+
+    */
+
+    function changeUpdateTimer(){
+        // TODO Change the Action Button Title
+        var checkbox = document.getElementById("autoUpdateToggle").checked;
+
+        if (typeof updateGame == 'undefined'){
+            updateGame = setInterval(() => openSavedGame(), refreshTime);
+            checkbox = true;
+        } else {
+            updateGame = clearInterval(updateGame);
+            checkbox = false;
+        }
+    }
+
+    // Sync Functions
+    function openSavedGame(){
+        var token = uuidv3();
+        console.log("Loading Saved Games: " + token);
+        setSpinner(true, "refreshGameButton");
+        // Open the session data
+        axios.get(session.gamedata + '?token=' + token, [], {
+            headers: {
+                'Content-Type': 'text/json'
+        }})
+        .then((response) => {
+
+            // Clear the audit log to pull the saved one
+            masterAuditLog = [];
+            document.getElementById("gameAuditLog").innerHTML = "";
+
+            // Parse the CSV for score, uneeded from rebuild
+            var score = response.data.gameScore.split(",");
+            newGameScore.home = Number(score[0]);
+            newGameScore.away = Number(score[1]);
+            updateGameScore();
+
+            // Parse the game time
+            gameClock.time = Number(response.data.gameTime);
+            updateGameTime();
+
+            // Parse the CSV and set the player data
+            var pd = response.data.auditLog;
+            pd = pd.split(",");
+
+            var totalCount = 0;
+            var count = 0;
+            var playerid = "";
+            var time = 0;
+            var eid = 0;;
+
+            for (var i=0; i < pd.length; i++){
+                if (count == 0){
+                    eid = pd[i];
+                }
+                if (count == 1){
+                    playerid = pd[i];
+                }
+                if (count == 2) {
+                    time = Number(pd[i]);
+                    masterAuditLog[eid] = {"playerid": playerid, "time":time};
+                    count = -1;
+                }
+                count++;
+                totalCount++;
+            }
+
+            rebuildGameFromAuditLog();
+            setSpinner(false, "refreshGameButton");
+        })
+    }
+
+    
+    // Background Application Functions
+
+
+
+
+    
+    function rebuildGameFromAuditLog(){
+
+        /*
+        var keys = Object.keys(players);
+        for (let i=0; i<keys.length; i++){
+            players[keys[i]].goals = Number(0);
+        }
+        */
+
+        newGameScore.home = 0;
+        newGameScore.away = 0;
+
+
+        var keys = Object.keys(masterAuditLog);
+        for (let i=0; i<keys.length; i++){
+            var t = masterAuditLog[keys[i]];
+            if (t.playerid != "000000"){
+                newGameScore.home += 1;
+            } else {
+                newGameScore.away += 1;
+            }
+            
+            createAuditDisplayOnly({"auditid": keys[i], "playerid": t.playerid, "time": t.time});
+        }
+
+
+        // Loop through players and update
+        /*
+        var keys = Object.keys(players);
+        for (let i=0; i<keys.length; i++){
+            players[keys[i]].updateDisplays();
+        }
+        */
+
+        updateGameScore();        
+
+    }
+
+    function createAuditDisplayOnly(obj){
+        var auditLogDisplay = document.getElementById("gameAuditLog");
+
+        // Set the variables
+        var id = obj.playerid; // 000000 is going to be opponent
+        if (obj.playerid != "000000"){
+            var name = players[obj.playerid].name;
+            //var name = "Player: " + obj.playerid;
+        } else {
+            var name = "Opponent";
+        }
+        
+        var time = obj.time;
+        var eid = obj.auditid;
+
+
+        // Create the Entry Display
+
+        var entry = document.createElement("tr");
+        entry.className = "";
+        entry.id = id;
+        entry.setAttribute("auditID", eid);
+
+        var playerName = document.createElement("td");
+        playerName.className = "";
+        playerName.innerHTML = name;
+        entry.appendChild(playerName);
+
+        var message = document.createElement("td");
+        message.className = "";
+        message.innerHTML = "Scored a Goal in " + Math.floor(time/60) + "'"
+        entry.appendChild(message);
+
+        auditLogDisplay.insertBefore(entry, auditLogDisplay.firstChild);
+
+
+
+        //var auditLogDisplay = document.getElementById("gameAuditLog");
+        auditLogDisplay.insertBefore(entry, auditLogDisplay.firstChild);
+    }
+
+    function updateGameScore(){
+        document.getElementById("gameScore").innerHTML = newGameScore.home + " - " + newGameScore.away;
+    }
+    function updateGameTime(){
+        document.getElementById("gameClock").innerHTML = formatTimer(gameClock.time);
+    }
+
+
+</script>

@@ -1,0 +1,66 @@
+<html>
+    <head>
+        <script src="/coach/res/axios.min.js"></script>
+        <link rel="stylesheet" href="/coach/res/font-awesome.min.css">
+        <link rel="stylesheet" href="/coach/res/bulma.min.css">
+        <link href="/coach/res/bulma-switch.min.css" rel="stylesheet"></link>
+
+        <title>
+            Huddlerr Start Page
+        </title>
+    </head>
+    <body>
+        <div class="container">
+
+            <div class="columns">
+                <div class="column">
+                    <h2 class="title is-2">Control the Game</h2>
+                <a href="control.html?session=dragons" class="button is-danger is-outlined">control dragons game</a> </br> </br>
+  
+                <a href="control.html?session=phoenix" class="button is-danger is-outlined">control phoenix game</a> </br> </br>
+           
+                <a href="control.html?session=defenders" class="button is-danger is-outlined">control defenders game</a>
+                </div>
+
+                <div class="column">
+                    <h2 class="title is-2">View the Game</h2>
+                <a href="scoreboard.html?session=dragons" class="button is-info ">view dragons game</a> </br> </br>
+  
+                <a href="scoreboard.html?session=phoenix" class="button is-info ">view phoenix game</a> </br> </br>
+           
+                <a href="scoreboard.html?session=defenders" class="button is-info ">view defenders game</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script src="./js/pocketbase.umd.js"></script>
+
+
+
+<script src="./js/pbControls.js"></script>
+
+
+<script>
+    
+document.addEventListener('alpine:init', () => {
+    Alpine.data('lists', () => ({
+        // VARIABLES
+        
+        async init () {
+        // initialize pocketbase
+            this.client = new PocketBase('http://127.0.0.1:8090');
+
+            const result = await pb.collection('players').getList(1, 20, {
+                filter: 'created > "2022-08-01 10:00:00"'
+            });
+
+            console.log(result);
+        }
+    }))
+})
+
+</script>
