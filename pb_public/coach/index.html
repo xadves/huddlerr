@@ -24,11 +24,21 @@
 
                 <div class="column">
                     <h2 class="title is-2">View the Game</h2>
-                <a href="scoreboard.html?session=dragons" class="button is-info ">view dragons game</a> </br> </br>
-  
-                <a href="scoreboard.html?session=phoenix" class="button is-info ">view phoenix game</a> </br> </br>
-           
-                <a href="scoreboard.html?session=defenders" class="button is-info ">view defenders game</a>
+                    <a href="scoreboard.html?session=dragons" class="button is-info ">view dragons game</a> </br> </br>
+    
+                    <a href="scoreboard.html?session=phoenix" class="button is-info ">view phoenix game</a> </br> </br>
+            
+                    <a href="scoreboard.html?session=defenders" class="button is-info ">view defenders game</a>
+                </div>
+                <div class="column">
+                    <li><i x-show="!showLogin" @click="logout()" class="" style="cursor: pointer">Logout of Account</i></li>
+                    <div x-init="console.log('I\'m being initialized!')"></div>
+                    <template x-for="list in lists">
+                        <div style="display:flex; justify-content: space-between; margin-top: 1rem">Player: 
+                          <u><strong x-text="list.name" @click="selectList(list)" style="cursor: pointer;"></strong></u>
+                          <i @click="deleteList(list)" class="bx bx-trash bx-sm" style="text-align: end; cursor: pointer"></i>
+                        </div>
+                      </template>
                 </div>
             </div>
         </div>
@@ -45,13 +55,18 @@
 
 
 <script>
+console.log("init");
     
 document.addEventListener('alpine:init', () => {
     Alpine.data('lists', () => ({
         // VARIABLES
+        client: null,
+        showLogin: false,
         
         async init () {
         // initialize pocketbase
+            console.log("Made it here?");
+            /*
             this.client = new PocketBase('http://127.0.0.1:8090');
 
             const result = await pb.collection('players').getList(1, 20, {
@@ -59,7 +74,19 @@ document.addEventListener('alpine:init', () => {
             });
 
             console.log(result);
+            */
+        },
+
+        async logout() {
+            console.log("Made it this far");
+
+            if (this.showLogin){
+                this.showLogin = false;
+            } else {
+                this.showLogin = true;
+            }
         }
+
     }))
 })
 
