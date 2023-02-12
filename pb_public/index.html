@@ -176,7 +176,17 @@
         
                     <table id="" class="table is-fullwidth has-text-centered">
                         <thead></thead>
-                        <tbody id="gameAuditLog"></tbody>
+                        <tbody id="gameAuditLog">
+
+                            <template x-for="entry in currentGame.auditLog.reverse()">
+                                <tr>
+                                    <td x-text="entry.player"></td>
+                                    <td x-text="entry.time"></td>
+                                </tr>
+                            </template>
+
+
+                        </tbody>
                      
                     </table>
                 </div>
@@ -285,17 +295,17 @@
                     <table class="table is-fullwidth is-striped" >
                         <thead>
                           <tr>
-                            <th>Name</th>
-                            <th>Goals</th>
-                            <th>Time</th>
+                            <th><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center">Name</div></th>
+                            <th><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center">Goals</div></th>
+                            <th><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center">Time</div></th>
                           </tr>
                         </thead>
                         <tbody id="playerTable">
                             <template x-for="player in players">
                                 <tr>
                                     <td><span x-text="player.number"></span>: <span x-text="player.name"></span></td>
-                                    <td><span x-text="player.goals"></span><button class="button" @click="addPlayerScore(player.id)">Add Goal</button></td>
-                                    <td><span x-text="player.time"></span><button class="button" @click="togglePlayerTimer(player.id)">Flip Timer</button></td>
+                                    <td><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center"><span x-text="player.goals"></span> <button class="button" @click="addPlayerScore(player.id)">Add Goal</button></div></td>
+                                    <td><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center"><span x-text="player.time"></span> <button class="button" @click="togglePlayerTimer(player.id)">Flip Timer</button></div></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -307,7 +317,17 @@
     
                 <table id="" class="table is-fullwidth has-text-centered">
                     <thead></thead>
-                    <tbody id="gameAuditLog"></tbody>
+                    <tbody id="gameAuditLog">
+
+                        <template x-for="(entry, index) in currentGame.auditLog.sort(auditLogSort)">
+                            <tr>
+                                <td x-text="parsePlayer(entry.player)"></td>
+                                <td x-text="entry.time"></td>
+                                <td><button @click="deleteAuditEntry(index)">Delete Event</button></td>
+                            </tr>
+                        </template>
+
+                    </tbody>
                  
                 </table>
             </div>
@@ -329,7 +349,7 @@
                             <template x-for="team in teams">
                                 <tr>
                                     <td x-text="team.name"></td>
-                                    <td><button @click="findGames(team.id)">View Team Games</button> <button @click="managePlayers(team.id)">Manage Players</button> <button @click="console.log('Edit Team')">Edit Team</button></td>
+                                    <td><button @click="findGames(team.id)">View Team Games</button> <button @click="managePlayers(team.id)">Manage Players</button> <button @click="editTeam(team.id)">Edit Team</button></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -338,11 +358,39 @@
                     
                 </div>
             </template>
+
+            <!-- Edit Team -->
+            <template x-if="show.editTeam">
+                <div>
+
+                      <div class="field">
+                        <label class="label">Team Name</label>
+                        <div class="control has-icons-left has-icons-right">
+                          <input class="input" type="text" placeholder="Team Name" x-model="team.name">
+                        </div>
+                      </div>
+
+
+                      
+                      
+                      <div class="field is-grouped">
+                        <div class="control">
+                          <button class="button is-link" @click="updateTeam()">Update Team</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-link" @click="teamManagement()">Return</button>
+                        </div>
+                      </div>
+
+
+                    
+                </div>
+            </template>
             
             <!-- Manage Players -->
             <template x-if="show.managePlayers">
                 <div>
-                    Player List <button @click="createPlayer(this.teamID)">Add Player</button>
+                    Player List <button @click="createPlayer(currentTeamID)">Add Player</button>
                     <table id="" class="table is-fullwidth">
                         <thead>
                             <tr>
@@ -357,7 +405,7 @@
                                 <tr>
                                     <td x-text="player.number"></td>
                                     <td x-text="player.name"></td>
-                                    <td><button @click="console.log(player.id)">Edit Player</button></td>
+                                    <td><button @click="editPlayer(player.id)">Edit Player</button></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -370,8 +418,40 @@
             <!-- Edit Player -->
             <template x-if="show.editPlayer">
                 <div>
-                    
-                    Edit this player !!
+                
+                    <span x-text="player.name"></span>
+                    <span x-text="player.id"></span>
+                    <span x-text="player.team"></span>
+
+                    <button @click="managePlayers(player.team)">Return</button>
+
+                    <div class="field">
+                        <label class="label">Player Number</label>
+                        <div class="control has-icons-left has-icons-right">
+                          <input class="input" type="text" placeholder="Player Number" x-model="player.number">
+                        </div>
+                      </div>
+
+                      <div class="field">
+                        <label class="label">Player Name</label>
+                        <div class="control has-icons-left has-icons-right">
+                          <input class="input" type="text" placeholder="Player Name" x-model="player.name">
+                        </div>
+                      </div>
+
+
+                      
+                      
+                      <div class="field is-grouped">
+                        <div class="control">
+                          <button class="button is-link" @click="updatePlayer()">Update Player</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-link" @click="managePlayers(player.team)">Return</button>
+                        </div>
+                      </div>
+
+
                     
                 </div>
             </template>
@@ -440,9 +520,18 @@
                 this.pb.authStore.clear();
                 this.validLogin = this.pb.authStore.isValid;
             },
+            async parsePlayer(player){
+
+                try {                
+                    if (player != '000000'){
+                        return this.players[this.reversePlayerKeyMap[player]].name;
+                    } else {
+                        return player;
+                    }
+                } catch (err){ return player; }
+                
+            },
             async handleLogin(){
-                // Unusued right now
-                //this.showLayer("login");
 
                 try {
 
@@ -483,11 +572,11 @@
             async teamManagement() {
                 this.teams = [];
                 // Find Authorized Teams
-                const teams = await this.pb.collection('teams').getFullList(200, {
+                const record = await this.pb.collection('teams').getFullList(200, {
                     sort: '-created',
                     filter: 'user="'+ this.pb.authStore.model.id +'"'
                 })
-                this.teams = teams;
+                this.teams = record;
                 this.showLayer("allowedTeamList");
             },
             async managePlayers(teamID){
@@ -497,6 +586,7 @@
                     filter: 'team="'+ teamID +'"'
                 })
                 this.players = players;
+                this.currentTeamID = teamID;
                 this.showLayer("managePlayers");
             },
             async controlTeam(teamID){
@@ -527,12 +617,20 @@
                     players[i].goals = 0;
                 }
 
-                for (let i in this.currentGame.gameData.players){
-                    players[keys[i]].time = this.currentGame.gameData.players[i];
+                if (this.currentGame.auditLog == null){
+                    this.currentGame.auditLog = [];
+                }
+
+                if (this.currentGame.gameData){
+                    for (let i in this.currentGame.gameData.players){
+                        players[keys[i]].time = this.currentGame.gameData.players[i];
+                    }
                 }
 
                 this.players = players;
                 this.reversePlayerKeyMap = keys;
+
+                this.rebuildFromAuditLog();
                 
                 this.showLayer('controlGame');
             },
@@ -541,6 +639,7 @@
                 this.currentGame = await this.pb.collection('games').getOne(this.currentGame.id, {
                     expand: 'team',
                 });
+
             },
             async createTeam(){
                 try {
@@ -552,11 +651,53 @@
                     console.log(err);
                 }
             },
+            async editTeam(teamID){
+                try {
+                    if (this.pb.authStore.isValid){
+                        const record = await this.pb.collection('teams').getOne(teamID, {});
+                        team = record;
+                        this.showLayer('editTeam');
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
+            async updateTeam(){
+                try {
+                    if (this.pb.authStore.isValid){
+                        const record = await this.pb.collection('teams').update(team.id, team);
+                        this.teamManagement();
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
             async createPlayer(teamID){
                 try {
                     if (this.pb.authStore.isValid){
                         const record = await this.pb.collection('players').create({"name": "New Player", "team": teamID});
                         this.managePlayers(teamID);
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
+            async editPlayer(playerID){
+                try {
+                    if (this.pb.authStore.isValid){
+                        const record = await this.pb.collection('players').getOne(playerID, {});
+                        player = record;
+                        this.showLayer('editPlayer');
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
+            async updatePlayer(){
+                try {
+                    if (this.pb.authStore.isValid){
+                        const record = await this.pb.collection('players').update(player.id, player);
+                        this.managePlayers(player.team);
                     }
                 } catch (err) {
                     console.log(err);
@@ -632,11 +773,6 @@
                     saveGame();
                 }
 
-                // I dont like running this on every tick, but this is preventing a bug that increases game clock when changing from controling a game to viewing one. This should not be a common occurance, so this is an expensive operation that can be handled better.
-                if (this.show.controlGame == false){
-                    clearInterval(this.gameClock);
-                    this.gameClock = 'undefined';
-                }
             },
             async togglePlayerTimer(player){
                 if(this.activePlayers[player] != true){
@@ -645,8 +781,30 @@
                     delete this.activePlayers[player];
                 }
             },
+            async deleteAuditEntry(index){
+               this.currentGame.auditLog.splice(index,index+1);
+               this.rebuildFromAuditLog();
+            },
+            async rebuildFromAuditLog(){
+                this.currentGame.awayScore = 0;
+                this.currentGame.homeScore = 0;
+
+                for (let i in this.players){
+                    this.players[i].goals = 0;
+                }
+
+                for (let i in this.currentGame.auditLog){
+                    if (this.currentGame.auditLog[i].player == "000000"){
+                        this.currentGame.awayScore++;
+                    } else {
+                        this.players[this.reversePlayerKeyMap[this.currentGame.auditLog[i].player]].goals++;
+                        this.currentGame.homeScore++;
+                    }
+                }
+            },
             async addOpponentScore(){
                 // TODO : Update the Audit Log
+                this.currentGame.auditLog.push({"player":"000000", "time":this.currentGame.gameTime});
 
                 // Update the Current Game
                 this.currentGame.awayScore++;
@@ -654,6 +812,8 @@
             },
             async addPlayerScore(player){
                 // TODO : Update the Audit Log
+                this.currentGame.auditLog.push({"player":player, "time":this.currentGame.gameTime});
+                this.players[this.reversePlayerKeyMap[player]].goals++;
 
                 // Update the Current Game
                 this.currentGame.homeScore++;
@@ -665,7 +825,7 @@
                 for (let i in this.players){
                     gameData.players[this.players[i].id] = this.players[i].time;
                 }
-                console.log(gameData);
+                //console.log(gameData);
 
                 this.currentGame.gameData = gameData;
                 const record = await this.pb.collection('games').update(this.currentGame.id, this.currentGame);
@@ -701,6 +861,18 @@
                     console.log("[v] Showing Layer:")
                     console.log(layer);
                 }
+
+                if ((this.scoreboardSync != 'undefined') && (layer != 'scoreboard')){
+                    clearInterval(this.scoreboardSync);
+                    this.scoreboardSync = 'undefined';
+                }
+
+                if ((this.gameClock != 'undefined') && (layer != 'controlGame')){
+                    clearInterval(this.gameClock);
+                    this.gameClock = 'undefined';
+                }
+
+
                 var keys = Object.keys(this.show);
                 for (let i=0; i<keys.length; i++){
                     this.show[keys[i]] = false;
@@ -745,5 +917,9 @@ function getSession(){
     var c = url.searchParams.get("team");
     return c;
 
+}
+
+function auditLogSort(a,b){
+    return b.time - a.time;
 }
 </script>
