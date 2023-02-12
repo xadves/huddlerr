@@ -1,0 +1,749 @@
+<html>
+    <head>
+        <script src="/coach/res/axios.min.js"></script>
+        <link rel="stylesheet" href="/coach/res/font-awesome.min.css">
+        <link rel="stylesheet" href="/coach/res/bulma.min.css">
+        <link href="/coach/res/bulma-switch.min.css" rel="stylesheet"></link>
+
+        <title>
+            Huddlerr Start Page
+        </title>
+    </head>
+    <body x-data="mainPage">
+
+        <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="/">
+                    <strong>Huddlerr</strong> <!-- Obv change this to Huddlerr lmao -->
+                </a>
+                <a role="button" class="navbar-burger">
+                    <a class="navbar-item" @click="gameList()">
+                        All Games
+                    </a>
+                    <a class="navbar-item" @click="teamManagement()" x-show="validLogin">Manage Teams</a>
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-danger" disabled x-show="!validLogin">
+                                <strong>Sign up</strong>
+                            </a>
+                            <a class="button is-info" @click="showLayer('login')" x-show="!validLogin">
+                                Log in
+                            </a>
+                            <a class="button is-danger" @click="logout()" x-show="validLogin">
+                                Log out
+                            </a>
+                        </div>
+                    </div>
+                </a>
+            </div>
+          </nav>
+
+        <div class="container">
+
+            
+
+            <!-- 
+                Flow is going: 
+                Show a list of current games -> take you to the scoreboard when selected
+                Give the use the option to "control a game" -> check the are logged in
+                give a list of games or create a new one            
+            -->
+
+            <!-- List of Current Games -->
+            <template x-if="show.allGames">
+                <div>
+                    Current Games Being Played
+                    <table id="" class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th id="">Team Name</th>
+                                <th id="">Game Date</th>
+                            </tr>
+                            
+                        </thead>
+                        <tbody id="">
+                            <tr>
+                                <td id="">HC Team 1</td>
+                                <td id="">Today!! Woo!</td>
+                            </tr>
+                            <template x-for="game in games">
+                                <tr @click="selectGame(game.id)">
+                                    <td x-text="game.expand.team.name"></td>
+                                    <td x-text="game.date"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    
+                    </table>
+                    
+                </div>
+            </template>
+
+            <!-- Login Page -->
+            <template x-if="show.login">
+                <div>
+                      
+                    This system is by invite only for the time being
+                      
+                      <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control has-icons-left has-icons-right">
+                          <input class="input is-danger" type="email" placeholder="Email input" value="hello@" x-model="credentials.username">
+                          <span class="icon is-small is-left">
+                            <i class="fas fa-envelope"></i>
+                          </span>
+                          <span class="icon is-small is-right">
+                            <i class="fas fa-exclamation-triangle"></i>
+                          </span>
+                        </div>
+                        <p class="help is-danger">This email is invalid</p>
+                      </div>
+
+
+                      <div class="field">
+                        <label class="label">Password</label>
+                        <div class="control has-icons-left has-icons-right">
+                          <input class="input is-danger" type="password" x-model="credentials.password">
+                          <span class="icon is-small is-left">
+                            <i class="fas fa-key"></i>
+                          </span>
+                          <span class="icon is-small is-right">
+                            <i class="fas fa-exclamation-triangle"></i>
+                          </span>
+                        </div>
+                        <p class="help is-danger">This password is invalid</p>
+                      </div>
+                      
+                      
+                      <div class="field is-grouped">
+                        <div class="control">
+                          <button class="button is-link" @click="handleLogin()">Login</button>
+                        </div>
+                        <div class="control">
+                          <button class="button is-link is-light" disabled>Cancel</button>
+                        </div>
+                      </div>
+                </div>
+            </template>
+
+            <!-- Scoreboard -->
+            <template x-if="show.scoreboard">
+                <div>
+                    Score: <span x-text="currentGame.date"></span>, Team: <span x-text="currentGame.expand.team.name"></span>
+                    <div class="columns">
+                
+                        <div class="column" id="control-panel">
+                            <button class="button" @click="controlGame(currentGame.id)" x-show="allowedControl">Control Game</button>
+                            <button id="refreshGameButton" class="button" @click="updateScoreboard()">Refresh Game</button>
+                        </div>
+        
+                        <div class="column">
+                            <div id="control-panel" class="column has-text-centered">
+                                <div class="field">
+                                <input id="autoUpdateToggle" type="checkbox" name="autoUpdateToggle" class="switch is-medium is-success"  @click="toggleScoreboardSync()" checked>
+                                <label for="autoUpdateToggle">Auto Refresh Game</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <hr>
+        
+        
+                    <div class="columns is-centered is-vcentered">
+        
+                        <div class="column box has-text-centered">
+        
+                            <h1 class="title is-2">
+        
+                                Game Clock: <span class="" id="gameClock" x-text="formatTime(currentGame.gameTime)">00:00</span>
+        
+                            </h1>
+                        </div>
+                    </div>
+        
+                    <hr>
+        
+                    <div class="columns is-centered">
+                        <div class="column box has-text-centered">
+                            <h1 class="title is-2">
+                                Game Score: <span id="gameScore" x-text="currentGame.homeScore">0</span> - <span x-text="currentGame.awayScore">0</span>
+                            </h1>
+                        </div>
+                    </div>
+        
+                    <hr>
+        
+                    <table id="" class="table is-fullwidth has-text-centered">
+                        <thead></thead>
+                        <tbody id="gameAuditLog"></tbody>
+                     
+                    </table>
+                </div>
+            </template>
+
+            <!-- Team Game List -->
+            <template x-if="show.teamGameList">
+                <div>
+                    Team Game List <button href="/?team={this.teamID}">Link to This Team</button> <button @click="createGame(teamID)" x-show="validLogin">Create Game</button>
+                    <table id="" class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Game Date</th>
+                                <th>Home Score</th>
+                                <th>Away Score</th>
+                                <th>Game Time</th>
+                                <th>Actions</th>
+                            </tr>
+                            
+                        </thead>
+                        <tbody id="">
+                            <template x-for="game in games">
+                                <tr>
+                                    <td x-text="game.date"></td>
+                                    <td x-text="game.homeScore"></td>
+                                    <td x-text="game.awayScore"></td>
+                                    <td x-text="game.gameTime"></td>
+                                    <td><button @click="selectGame(game.id)">View Game</button><button x-show="verifiedTeam">Control Game</button></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    
+                    </table>
+                    
+                </div>
+            </template>
+
+            <!-- Control Game -->
+            <template x-if="show.controlGame">
+                <div>
+                <div class="columns is-centered is-vcentered">
+                    <div class="column box has-text-centered">
+                        <p class="bd-notification is-primary">
+                            <button id="saveButton" class="button" href="#" @click="saveGame()">Save Game</button>
+                            <button class="button" href="#" onclick="//finishGame()" disabled>Finish Game</button>
+                            <button class="button" href="#" onclick="//highlightSubs()" disabled>Highlight Subs</button>
+                        </p>
+                    </div>
+    
+    
+                    <div id="control-panel" class="column has-text-centered">
+                          <div class="field">
+                            <input id="autoSaveToggle" type="checkbox" name="autoSaveToggle" class="switch is-medium is-success"  @click="toggleAutoSave($el)">
+                            <label for="autoSaveToggle">Auto Save Game</label>
+                          </div>
+    
+                          <div class="field">
+                            <input id="autoHighlightSubsToggle" type="checkbox" name="autoHighlightSubsToggle" class="switch is-medium is-link" disabled>
+                            <label for="autoHighlightSubsToggle">Auto Highlight Subs</label>
+                          </div>
+                    </div>
+    
+                </div>
+    
+                <hr>
+    
+    
+                <div class="columns is-centered is-vcentered">
+    
+                    <div class="column box has-text-centered">
+    
+                        <h1 class="title is-2">
+    
+                            Game Clock: <span class="" id="gameClock" x-text="formatTime(currentGame.gameTime)">00:00</span>
+    
+                        </h1>
+                    </div>
+                    <div class="column has-text-centered">
+                        
+                        <div class="field">
+                            <input id="gameClockToggle" type="checkbox" name="gameClockToggle" class="switch is-medium is-info" @click="toggleGameClock($el)">
+                            <label for="gameClockToggle">Game Clock</label>
+                          </div>
+    
+                    </div>
+                </div>
+    
+                <hr>
+    
+                <div class="columns is-centered">
+                    <div class="column box has-text-centered">
+                        <h1 class="title is-2">
+                            Game Score: <span id="gameScore" x-text="currentGame.homeScore">0</span> - <span x-text="currentGame.awayScore">0</span>
+                        </h1>
+                    </div>
+                    <div class="column has-text-centered">
+                        <button class="button is-link is-outlined" @click="addOpponentScore()"><span>Add Opponent Score</span><span class="icon"><i class="fa fa-plus"></i></span></button>
+                    </div>
+                </div>
+    
+                <hr>
+    
+                <div class="columns">
+                    <div class="column">
+    
+                    <table class="table is-fullwidth is-striped" >
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Goals</th>
+                            <th>Time</th>
+                          </tr>
+                        </thead>
+                        <tbody id="playerTable">
+                            <template x-for="player in players">
+                                <tr>
+                                    <td><span x-text="player.number"></span>: <span x-text="player.name"></span></td>
+                                    <td><span x-text="player.goals"></span><button class="button" @click="addPlayerScore(player.id)">Add Goal</button></td>
+                                    <td><span x-text="player.time"></span><button class="button" @click="togglePlayerTimer(player.id)">Flip Timer</button></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                      </table>
+                </div>
+            </div>
+    
+                <hr>
+    
+                <table id="" class="table is-fullwidth has-text-centered">
+                    <thead></thead>
+                    <tbody id="gameAuditLog"></tbody>
+                 
+                </table>
+            </div>
+            </template>
+
+            <!-- Coach Controls -->
+            <template x-if="show.allowedTeamList">
+                <div>
+                    Team List <button @click="createTeam()">Add Team</button>
+                    <table id="" class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>Actions</th>
+                            </tr>
+                            
+                        </thead>
+                        <tbody id="">
+                            <template x-for="team in teams">
+                                <tr>
+                                    <td x-text="team.name"></td>
+                                    <td><button @click="findGames(team.id)">View Team Games</button> <button @click="managePlayers(team.id)">Manage Players</button> <button @click="console.log('Edit Team')">Edit Team</button></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    
+                    </table>
+                    
+                </div>
+            </template>
+            
+            <!-- Manage Players -->
+            <template x-if="show.managePlayers">
+                <div>
+                    Player List <button @click="createPlayer(this.teamID)">Add Player</button>
+                    <table id="" class="table is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Player Number</th>
+                                <th>Player Name</th>
+                                <th>Actions</th>
+                            </tr>
+                            
+                        </thead>
+                        <tbody id="">
+                            <template x-for="player in players">
+                                <tr>
+                                    <td x-text="player.number"></td>
+                                    <td x-text="player.name"></td>
+                                    <td><button @click="console.log(player.id)">Edit Player</button></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    
+                    </table>
+                    
+                </div>
+            </template>
+
+            <!-- Edit Player -->
+            <template x-if="show.editPlayer">
+                <div>
+                    
+                    Edit this player !!
+                    
+                </div>
+            </template>
+
+        </div>
+
+    </body>
+</html>
+
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> <!-- Make sure to download this locally -->
+
+<script src="/coach/js/pocketbase.umd.js"></script>
+
+<script>
+
+    /* This is going to be the main SPA; handling authentication, scoreboard, and coach controls. */
+
+     document.addEventListener('alpine:init', () => {
+        Alpine.store('thisisauselessstorethatineedtodelete', {
+            client: null,
+            async init() {
+
+                console.log("[*] Client Initiated");
+
+            },
+            attachClient(){
+                this.client = new PocketBase('/');
+            },
+            accessPlayers(){
+
+                // Do nothing yet
+
+            }
+        }),
+        Alpine.data('mainPage', () => ({
+            debug: false,
+            games: [],
+            pb: null,
+            show: {},
+            currentGame: {expand: {team: {}}},
+            credentials: {username: "", password: null},
+            validLogin: false,
+            refreshSpeed: 5000,
+            scoreboardSync: 'undefined',
+            players: [], activePlayers: [], reversePlayerKeyMap: [],
+            autoSave: false,
+            gameClock: 'undefined',
+            async init () {
+                // Do nothing yet
+
+                // Easily change the pocketbase api location with this
+                this.pb = new PocketBase('/');
+
+                this.validLogin = this.pb.authStore.isValid;
+
+                var team = getSession();
+                if (team == null){
+                    this.gameList();
+                } else {
+                    // pull team games
+                    this.findGames(team);
+                }
+
+            },
+            async logout(){
+                this.pb.authStore.clear();
+                this.validLogin = this.pb.authStore.isValid;
+            },
+            async handleLogin(){
+                // Unusued right now
+                //this.showLayer("login");
+
+                try {
+
+                const authData = await this.pb.collection('users').authWithPassword(this.credentials.username, this.credentials.password);
+                this.password = null;
+                this.validLogin = this.pb.authStore.isValid;
+
+                // Take the user somewhere new?
+                this.gameList();
+
+                    
+                } catch (err){
+                    //console.log(err);
+                    alert("invalid login")
+                }
+
+
+                if (this.debug){
+                    console.log(this.pb.authStore.isValid);
+                    console.log(this.pb.authStore.token);
+                    console.log(this.pb.authStore.model.id);
+                }
+
+            },
+            async gameList(){
+                const games = await this.pb.collection('games').getFullList(200 , {
+                    sort: '-created',
+                    expand: "team"
+                });
+                this.games = games;
+
+                if (this.debug){
+                    console.log("[*] Retrieve Games");
+                    console.log(games);
+                }
+                this.showLayer("allGames");
+            },
+            async teamManagement() {
+                this.teams = [];
+                // Find Authorized Teams
+                const teams = await this.pb.collection('teams').getFullList(200, {
+                    sort: '-created',
+                    filter: 'user="'+ this.pb.authStore.model.id +'"'
+                })
+                this.teams = teams;
+                this.showLayer("allowedTeamList");
+            },
+            async managePlayers(teamID){
+                this.players = [];
+                const players = await this.pb.collection('players').getFullList(200, {
+                    sort: '-number',
+                    filter: 'team="'+ teamID +'"'
+                })
+                this.players = players;
+                this.showLayer("managePlayers");
+            },
+            async controlTeam(teamID){
+                // Do something
+            },
+            async controlGame(gameID){
+                this.showLayer('controlGame'); // I don't understand why I need this twice yet
+                if (this.scoreboardSync != 'undefined'){
+                    clearInterval(this.scoreboardSync);
+                    this.scoreboardSync = 'undefined';
+                }
+
+                const currentGame = await this.pb.collection('games').getOne(gameID, {
+                    expand: 'team',
+                });
+                this.currentGame = currentGame;
+
+                this.players = [];
+                const players = await this.pb.collection('players').getFullList(200, {
+                    sort: '-number',
+                    filter: 'team="'+ this.currentGame.team +'"'
+                })
+                
+                var keys = {};
+                for (let i in players){
+                    keys[players[i].id] = i;
+                    players[i].time = 0;
+                    players[i].goals = 0;
+                }
+
+                for (let i in this.currentGame.gameData.players){
+                    players[keys[i]].time = this.currentGame.gameData.players[i];
+                }
+
+                this.players = players;
+                this.reversePlayerKeyMap = keys;
+                
+                this.showLayer('controlGame');
+            },
+            async updateScoreboard(){
+                console.log("Updated Game");
+                this.currentGame = await this.pb.collection('games').getOne(this.currentGame.id, {
+                    expand: 'team',
+                });
+            },
+            async createTeam(){
+                try {
+                    if (this.pb.authStore.isValid){
+                        const record = await this.pb.collection('teams').create({"name": "New Team", "user": this.pb.authStore.model.id});
+                        this.teamManagement();
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
+            async createPlayer(teamID){
+                try {
+                    if (this.pb.authStore.isValid){
+                        const record = await this.pb.collection('players').create({"name": "New Player", "team": teamID});
+                        this.managePlayers(teamID);
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
+            async createGame(teamID){
+                try {
+                    if (this.pb.authStore.isValid){
+                        var date = new Date();
+                        date = date.toJSON();
+                        const record = await this.pb.collection('games').create({"date": date, "team": teamID});
+                        this.findGames(teamID)
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            },
+            async findGames(teamID){
+                this.teamID = teamID;
+                this.verifiedTeam = false;
+                // If user is team coach, show control buttons. or maybe put it somewhere else
+                const games = await this.pb.collection('games').getFullList(200, {
+                    sort: '-created',
+                    filter: 'team="'+ teamID +'"'
+                })
+                this.games = games;
+                this.showLayer('teamGameList');
+            },
+            async toggleScoreboardSync(){
+                if (this.scoreboardSync == 'undefined'){
+                    this.scoreboardSync = setInterval(() => this.updateScoreboard(), this.refreshSpeed);
+                } else {
+                    clearInterval(this.scoreboardSync);
+                    this.scoreboardSync = 'undefined';
+                }
+            },
+            async toggleGameClock(element){
+                if (this.gameClock == 'undefined'){
+                    this.gameClock = setInterval(() => this.handleGameTick(), 1000);
+                    element.checked = true;
+                } else {
+                    clearInterval(this.gameClock);
+                    this.gameClock = 'undefined';
+                    element.checked = false;
+                }
+            },
+            async toggleAutoSave(element){
+
+                if (this.autoSave){
+                    this.autoSave = false;
+                    element.checked = false;
+                } else {
+                    this.saveGame(); // Do this once so it runs even if the game clock is not running
+                    this.autoSave = true;
+                    element.checked = true;
+                }
+            },
+            async handleGameTick(){
+                // Instead of so many multiple clocks, this one will check players to add time, and handle save game if those options are set.
+
+                // TODO : Forward Game Clock
+                this.currentGame.gameTime++;
+
+                // TODO : Forward Player Clocks for all players in
+                var keys = Object.keys(this.activePlayers);
+                for (let i=0; i<keys.length; i++){
+                    this.players[this.reversePlayerKeyMap[keys[i]]].time++;
+                    //this.currentGame.gameData[keys[i]].time++;
+                }
+
+                // TODO : Check Autosave and Perform action
+                if (this.autoSave){
+                    saveGame();
+                }
+
+                // I dont like running this on every tick, but this is preventing a bug that increases game clock when changing from controling a game to viewing one. This should not be a common occurance, so this is an expensive operation that can be handled better.
+                if (this.show.controlGame == false){
+                    clearInterval(this.gameClock);
+                    this.gameClock = 'undefined';
+                }
+            },
+            async togglePlayerTimer(player){
+                if(this.activePlayers[player] != true){
+                    this.activePlayers[player] = true;
+                } else {
+                    delete this.activePlayers[player];
+                }
+            },
+            async addOpponentScore(){
+                // TODO : Update the Audit Log
+
+                // Update the Current Game
+                this.currentGame.awayScore++;
+
+            },
+            async addPlayerScore(player){
+                // TODO : Update the Audit Log
+
+                // Update the Current Game
+                this.currentGame.homeScore++;
+
+            },
+            async saveGame(){
+                // TODO : Add an option to save this data locally for offline usage, javascript localStorage I think?
+                var gameData = {players: {}}
+                for (let i in this.players){
+                    gameData.players[this.players[i].id] = this.players[i].time;
+                }
+                console.log(gameData);
+
+                this.currentGame.gameData = gameData;
+                const record = await this.pb.collection('games').update(this.currentGame.id, this.currentGame);
+            },
+            async selectGame(game){
+                this.allowedControl = false;
+
+                
+                const currentGame = await this.pb.collection('games').getOne(game, {
+                    expand: 'team',
+                });
+                this.currentGame = currentGame;
+
+                this.scoreboardSync = setInterval(() => this.updateScoreboard(), this.refreshSpeed);
+
+                
+
+                if (this.pb.authStore.isValid){
+                    if (currentGame.expand.team.user == this.pb.authStore.model.id){
+                        this.allowedControl = true;
+                        console.log("This user is allowed to control this game");
+                    }
+                }
+
+                if (this.debug){
+                    console.log("[v] Game ID: ");
+                    console.log(game);
+                }
+                this.showLayer("scoreboard");
+            },
+            async showLayer(layer){
+                if (this.debug){
+                    console.log("[v] Showing Layer:")
+                    console.log(layer);
+                }
+                var keys = Object.keys(this.show);
+                for (let i=0; i<keys.length; i++){
+                    this.show[keys[i]] = false;
+                }
+
+               this.show[layer] = true;
+            }
+        }))
+      })
+
+// This is in a common functions page, staying here for testing purposes for now
+function formatTime(time){
+    // Convert Seconds to 00:00 format
+    temp = "";
+
+    // Create Minutes
+    minutes = Math.floor(time/60);
+    if (minutes < 10) {
+        temp = "0" + String(minutes);
+    } else {
+        temp += String(minutes);
+    }
+    temp += ":";
+
+    // Create Seconds
+    seconds = time%60;
+    if (seconds < 10){
+        temp += "0" + seconds;
+    } else {
+        temp += seconds;
+    }
+
+    // Return the String
+    return temp;
+}
+
+function getSession(){
+
+// We need to do input validation on this
+
+    var url = new URL(window.location.href);
+    var c = url.searchParams.get("team");
+    return c;
+
+}
+</script>
