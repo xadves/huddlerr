@@ -1,9 +1,10 @@
 <html>
     <head>
-        <script src="/coach/res/axios.min.js"></script>
-        <link rel="stylesheet" href="/coach/res/font-awesome.min.css">
-        <link rel="stylesheet" href="/coach/res/bulma.min.css">
-        <link href="/coach/res/bulma-switch.min.css" rel="stylesheet"></link>
+        <script src="/legacy/res/axios.min.js"></script>
+        <link rel="stylesheet" href="/legacy/res/font-awesome.min.css">
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+
 
         <title>
             Huddlerr Start Page
@@ -11,36 +12,37 @@
     </head>
     <body x-data="mainPage">
 
-        <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <nav class="navbar navbar-expand-lg bg-body-secondary" role="navigation" aria-label="main navigation">
+		<div class="container">
             <div class="navbar-brand">
                 <a class="navbar-item" href="/">
-                    <strong>Huddlerr</strong> <!-- Obv change this to Huddlerr lmao -->
+                    <strong>Huddlerr</strong>
                 </a>
-                <a role="button" class="navbar-burger">
-                    <a class="navbar-item" @click="gameList()">
-                        All Games
-                    </a>
-                    <a class="navbar-item" @click="teamManagement()" x-show="validLogin">Manage Teams</a>
-                    <div class="navbar-item">
-                        <div class="buttons">
-                            <a class="button is-danger" disabled x-show="!validLogin">
-                                <strong>Sign up</strong>
-                            </a>
-                            <a class="button is-info" @click="showLayer('login')" x-show="!validLogin">
-                                Log in
-                            </a>
-                            <a class="button is-danger" @click="logout()" x-show="validLogin">
-                                Log out
-                            </a>
-                        </div>
-                    </div>
-                </a>
+	    </div>
+	          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item">
+			    <button type="button" class="btn btn-primary" @click=gameList()>All Games</button>
+                    </li>
+		    <li class="nav-item">
+			    <button type="button" class="btn btn-danger" x-show="!validLogin" disabled>Sign Up</button>
+		    </li>
+		    <li class="nav-item">
+			    <button type="button" class="btn btn-info" x-show="!validLogin" @click="showLayer('login')">Login</button>
+		    </li>
+		    <li class="nav-item">
+			    <button type="button" class="btn btn-info" x-show="validLogin" @click="teamManagement()">Manage Teams</button>
+		    </li>
+		    <li class="nav-item">
+			    <button type="button" class="btn btn-danger" x-show="validLogin" @click="logout()">Log Out</button>
+		    </li>
+		  </ul>
             </div>
+		</div>
           </nav>
 
         <div class="container">
 
-            
 
             <!-- 
                 Flow is going: 
@@ -53,7 +55,7 @@
             <template x-if="show.allGames">
                 <div>
                     Current Games Being Played
-                    <table id="" class="table is-fullwidth">
+                    <table id="" class="table table-striped">
                         <thead>
                             <tr>
                                 <th id="">Team Name</th>
@@ -83,98 +85,68 @@
             <template x-if="show.login">
                 <div>
                       
-                    This system is by invite only for the time being
+                    This system is by invite only for the time being. This page is going to be a modal instead of a dedicated page.
                       
-                      <div class="field">
-                        <label class="label">Email</label>
-                        <div class="control has-icons-left has-icons-right">
-                          <input class="input is-danger" type="email" placeholder="Email input" value="hello@" x-model="credentials.username">
-                          <span class="icon is-small is-left">
-                            <i class="fas fa-envelope"></i>
-                          </span>
-                          <span class="icon is-small is-right">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </div>
-                        <p class="help is-danger">This email is invalid</p>
-                      </div>
 
-
-                      <div class="field">
-                        <label class="label">Password</label>
-                        <div class="control has-icons-left has-icons-right">
-                          <input class="input is-danger" type="password" x-model="credentials.password">
-                          <span class="icon is-small is-left">
-                            <i class="fas fa-key"></i>
-                          </span>
-                          <span class="icon is-small is-right">
-                            <i class="fas fa-exclamation-triangle"></i>
-                          </span>
-                        </div>
-                        <p class="help is-danger">This password is invalid</p>
-                      </div>
+                      <input class="form-control" type="text" placeholder="Email Address / Username" aria-label="" x-model="credentials.username">
+                </br>
+                      <input class="form-control" type="password" placeholder="Password" aria-label="" x-model="credentials.password">
+                </br>
+                      <button type="button" class="btn btn-primary" @click="handleLogin()">Log in</button>
                       
                       
-                      <div class="field is-grouped">
-                        <div class="control">
-                          <button class="button is-link" @click="handleLogin()">Login</button>
-                        </div>
-                        <div class="control">
-                          <button class="button is-link is-light" disabled>Cancel</button>
-                        </div>
-                      </div>
                 </div>
             </template>
 
             <!-- Scoreboard -->
             <template x-if="show.scoreboard">
                 <div>
-                    Score: <span x-text="currentGame.date"></span>, Team: <span x-text="currentGame.expand.team.name"></span>
-                    <div class="columns">
-                
-                        <div class="column" id="control-panel">
-                            <button class="button" @click="controlGame(currentGame.id)" x-show="allowedControl">Control Game</button>
-                            <button id="refreshGameButton" class="button" @click="updateScoreboard()">Refresh Game</button>
-                        </div>
-        
-                        <div class="column">
-                            <div id="control-panel" class="column has-text-centered">
-                                <div class="field">
-                                <input id="autoUpdateToggle" type="checkbox" name="autoUpdateToggle" class="switch is-medium is-success"  @click="toggleScoreboardSync()" checked>
-                                <label for="autoUpdateToggle">Auto Refresh Game</label>
-                                </div>
-                            </div>
+                    <div class="" id="controlPanel"> <!-- The Control Panel Needs Cleaned Up -->
+                        Date: <span x-text="currentGame.date"></span>, Team: <span x-text="currentGame.expand.team.name"></span>
+                        <button class="button" @click="controlGame(currentGame.id)" x-show="allowedControl">Control Game</button>
+                        <button id="refreshGameButton" class="button" @click="updateScoreboard()">Refresh Game</button>
+                        <div class="field">
+                            <input id="autoUpdateToggle" type="checkbox" name="autoUpdateToggle" class="switch is-medium is-success"  @click="toggleScoreboardSync()" checked>
+                            <label for="autoUpdateToggle">Auto Refresh Game</label>
                         </div>
                     </div>
-        
-                    <hr>
-        
-        
-                    <div class="columns is-centered is-vcentered">
-        
-                        <div class="column box has-text-centered">
-        
-                            <h1 class="title is-2">
-        
-                                Game Clock: <span class="" id="gameClock" x-text="formatTime(currentGame.gameTime)">00:00</span>
-        
+
+                    <div class="row">
+
+                    <div class="card col-5">
+                        <div class="card-body">
+                          <h5 class="card-title">Game Clock</h5>
+                          <h6 class="card-subtitle mb-2 text-muted">Current Game Clock</h6>
+                          <p class="card-text">
+                            <h1  x-text="formatTime(currentGame.gameTime)">    
                             </h1>
+                          </p>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" @click="toggleScoreboardSync()" checked>
+                            <label class="form-check-label" for="flexSwitchCheckChecked">Auto Refresh Game</label>
+                          </div>                          
                         </div>
-                    </div>
-        
-                    <hr>
-        
-                    <div class="columns is-centered">
-                        <div class="column box has-text-centered">
-                            <h1 class="title is-2">
-                                Game Score: <span id="gameScore" x-text="currentGame.homeScore">0</span> - <span x-text="currentGame.awayScore">0</span>
+                      </div>
+
+                      <div class="card offset-2 col-5">
+                        <div class="card-body">
+                          <h5 class="card-title">Game Score</h5>
+                          <h6 class="card-subtitle mb-2 text-muted">Current Game Score</h6>
+                          <p class="card-text">
+                            <h1>    
+                                <span x-text="currentGame.homeScore">0</span> - <span x-text="currentGame.awayScore">0</span>
                             </h1>
+                          </p>
                         </div>
+                      </div>
+
                     </div>
+                    
         
                     <hr>
         
-                    <table id="" class="table is-fullwidth has-text-centered">
+        
+                    <table id="" class="table table-striped">
                         <thead></thead>
                         <tbody id="gameAuditLog">
 
@@ -184,11 +156,10 @@
                                     <td x-text="entry.time"></td>
                                 </tr>
                             </template>
-
-
                         </tbody>
-                     
                     </table>
+
+
                 </div>
             </template>
 
@@ -196,7 +167,7 @@
             <template x-if="show.teamGameList">
                 <div>
                     Team Game List <button href="/?team={this.teamID}">Link to This Team</button> <button @click="createGame(teamID)" x-show="validLogin">Create Game</button>
-                    <table id="" class="table is-fullwidth">
+                    <table id="" class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Game Date</th>
@@ -227,64 +198,60 @@
             <!-- Control Game -->
             <template x-if="show.controlGame">
                 <div>
-                <div class="columns is-centered is-vcentered">
-                    <div class="column box has-text-centered">
-                        <p class="bd-notification is-primary">
-                            <button id="saveButton" class="button" href="#" @click="saveGame()">Save Game</button>
-                            <button class="button" href="#" onclick="//finishGame()" disabled>Finish Game</button>
-                            <button class="button" href="#" onclick="//highlightSubs()" disabled>Highlight Subs</button>
-                        </p>
+                <div class="">
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="bd-notification is-primary">
+                                <button id="saveButton" class="button" href="#" @click="saveGame()">Save Game</button>
+                                <button class="button" href="#" onclick="//finishGame()" disabled>Finish Game</button>
+                                <button class="button" href="#" onclick="//highlightSubs()" disabled>Highlight Subs</button>
+                            </p>
+                            <div class="field">
+                                <input id="autoSaveToggle" type="checkbox" name="autoSaveToggle" class="switch is-medium is-success"  @click="toggleAutoSave($el)">
+                                <label for="autoSaveToggle">Auto Save Game</label>
+                              </div>
+        
+                              <div class="field">
+                                <input id="autoHighlightSubsToggle" type="checkbox" name="autoHighlightSubsToggle" class="switch is-medium is-link" disabled>
+                                <label for="autoHighlightSubsToggle">Auto Highlight Subs</label>
+                              </div>
+                        </div>
                     </div>
-    
-    
-                    <div id="control-panel" class="column has-text-centered">
-                          <div class="field">
-                            <input id="autoSaveToggle" type="checkbox" name="autoSaveToggle" class="switch is-medium is-success"  @click="toggleAutoSave($el)">
-                            <label for="autoSaveToggle">Auto Save Game</label>
-                          </div>
-    
-                          <div class="field">
-                            <input id="autoHighlightSubsToggle" type="checkbox" name="autoHighlightSubsToggle" class="switch is-medium is-link" disabled>
-                            <label for="autoHighlightSubsToggle">Auto Highlight Subs</label>
-                          </div>
-                    </div>
-    
-                </div>
     
                 <hr>
     
     
-                <div class="columns is-centered is-vcentered">
+                <div class="row">
     
-                    <div class="column box has-text-centered">
-    
-                        <h1 class="title is-2">
-    
-                            Game Clock: <span class="" id="gameClock" x-text="formatTime(currentGame.gameTime)">00:00</span>
-    
-                        </h1>
-                    </div>
-                    <div class="column has-text-centered">
-                        
-                        <div class="field">
-                            <input id="gameClockToggle" type="checkbox" name="gameClockToggle" class="switch is-medium is-info" @click="toggleGameClock($el)">
-                            <label for="gameClockToggle">Game Clock</label>
-                          </div>
-    
-                    </div>
-                </div>
-    
-                <hr>
-    
-                <div class="columns is-centered">
-                    <div class="column box has-text-centered">
-                        <h1 class="title is-2">
-                            Game Score: <span id="gameScore" x-text="currentGame.homeScore">0</span> - <span x-text="currentGame.awayScore">0</span>
-                        </h1>
-                    </div>
-                    <div class="column has-text-centered">
-                        <button class="button is-link is-outlined" @click="addOpponentScore()"><span>Add Opponent Score</span><span class="icon"><i class="fa fa-plus"></i></span></button>
-                    </div>
+                    <div class="card col-5">
+                        <div class="card-body">
+                          <h5 class="card-title">Game Clock</h5>
+                          <h6 class="card-subtitle mb-2 text-muted">Current Game Clock</h6>
+                          <p class="card-text">
+                            <h1  x-text="formatTime(currentGame.gameTime)">    
+                            </h1>
+                          </p>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" @click="console.log('Game Clock')" checked>
+                            <label class="form-check-label" for="flexSwitchCheckChecked">Game Clock Toggle</label>
+                          </div>                          
+                        </div>
+                      </div>
+
+
+                      <div class="card offset-2 col-5">
+                        <div class="card-body">
+                          <h5 class="card-title">Game Score</h5>
+                          <h6 class="card-subtitle mb-2 text-muted">Current Game Score</h6>
+                          <p class="card-text">
+                            <h1>    
+                                <span x-text="currentGame.homeScore">0</span> - <span x-text="currentGame.awayScore">0</span>
+                            </h1>
+                          </p>
+                          <button type="button" class="btn btn-primary" @click="addOpponentScore()">Add Opponent Score</button>
+                        </div>
+                      </div>
+
                 </div>
     
                 <hr>
@@ -463,7 +430,9 @@
 
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> <!-- Make sure to download this locally -->
 
-<script src="/coach/js/pocketbase.umd.js"></script>
+<script src="/legacy/js/pocketbase.umd.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 
 <script>
 
