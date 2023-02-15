@@ -19,14 +19,18 @@ This project is being converted from a live php/js environment on a dev server t
 [Mikepicker on Medium](https://medium.com/@Mikepicker/build-a-multi-user-todo-list-app-with-pocketbase-in-a-single-html-file-8734bfb882fd) - This looks extremely helpful for getting started with this project
 
 ### Todo, not an exhaustive list.
-- Localize the CSS/JS files.
-- Change smaller functions from entire pages to modals.
-- Repair the basic interface to working status.
-- Highlight players that need to be subbed, make this a variable for the coach control. 
-- Prune unused libaries.
-- Prune the legacy application, this is no longer used.
+- [ ] Localize the CSS/JS files.
+- [ ] Change smaller functions from entire pages to modals.
+- [ ] Repair the basic interface to working status.
+- [ ] Highlight players that need to be subbed, make this a variable for the coach control. 
+- [ ] Prune unused libaries.
+- [ ] Prune the legacy application, this is no longer used.
+- [ ] Complete and copy the audit log section to the scoreboard section.
+- [ ] Fix the (auto)save feature
+- [ ] Implement highlight players feature, possibly looking at making a variable progress bar to visually show who is in the longest
 
 ## Changelog
+- 2023-02-14 Built more into the Bootstrap interface. Fixed the issue with mobile being small (meta viewport is a thing). Added switches to players sub in, testing out the "autosave" button/radio group (not working), fixed the navbar to look correct. Shrunk the columns from 12 to 10 and used justify around. I still don't love how the "control panel" area looks and I would like it to integrate more seemlessly into the design.
 - 2023-02-13 Started the transition from Bulma to Bootstrap. I have not pruned the CSS and JS files that are not going to be used, and currently using a CDN for about half of the content. I already likethe interface better, and I know how to manipulate this better.
 - 2023-02-12 Built the whole basics of the page with most of the basic functionality from the legacy version.
 - 2023-02-11 Began building the API to manage and get to games

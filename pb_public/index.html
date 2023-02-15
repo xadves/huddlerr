@@ -6,6 +6,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>
             Huddlerr Start Page
         </title>
@@ -13,33 +14,27 @@
     <body x-data="mainPage">
 
         <nav class="navbar navbar-expand-lg bg-body-secondary" role="navigation" aria-label="main navigation">
-		<div class="container">
-            <div class="navbar-brand">
-                <a class="navbar-item" href="/">
-                    <strong>Huddlerr</strong>
-                </a>
-	    </div>
-	          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <div class="container">
+                <a class="navbar-brand"><strong>Huddlerr</strong></a>
 
-                    <li class="nav-item">
-			    <button type="button" class="btn btn-primary" @click=gameList()>All Games</button>
-                    </li>
-		    <li class="nav-item">
-			    <button type="button" class="btn btn-danger" x-show="!validLogin" disabled>Sign Up</button>
-		    </li>
-		    <li class="nav-item">
-			    <button type="button" class="btn btn-info" x-show="!validLogin" @click="showLayer('login')">Login</button>
-		    </li>
-		    <li class="nav-item">
-			    <button type="button" class="btn btn-info" x-show="validLogin" @click="teamManagement()">Manage Teams</button>
-		    </li>
-		    <li class="nav-item">
-			    <button type="button" class="btn btn-danger" x-show="validLogin" @click="logout()">Log Out</button>
-		    </li>
-		  </ul>
+                <!-- This was in the bootstrap docs, and I am not 100% sure what it is for -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="#" @click=gameList()>All Games</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" x-show="validLogin" @click="teamManagement()">Manage Teams</a></li>
+                    </ul>
+
+                    <button class="btn btn-outline-danger" x-show="!validLogin">Sign Up</button>
+                    <button class="btn btn-outline-success" x-show="!validLogin" @click="showLayer('login')">Login</button>
+                    <button type="button" class="btn btn-danger" x-show="validLogin" @click="logout()">Log Out</button>
+
+                </div>
             </div>
-		</div>
-          </nav>
+        </nav>
 
         <div class="container">
 
@@ -111,7 +106,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row justify-content-around">
 
                     <div class="card col-5">
                         <div class="card-body">
@@ -128,7 +123,7 @@
                         </div>
                       </div>
 
-                      <div class="card offset-2 col-5">
+                      <div class="card col-5">
                         <div class="card-body">
                           <h5 class="card-title">Game Score</h5>
                           <h6 class="card-subtitle mb-2 text-muted">Current Game Score</h6>
@@ -198,30 +193,34 @@
             <!-- Control Game -->
             <template x-if="show.controlGame">
                 <div>
-                <div class="">
-                    <div class="row">
-                        <div class="col-12">
-                            <p class="bd-notification is-primary">
-                                <button id="saveButton" class="button" href="#" @click="saveGame()">Save Game</button>
-                                <button class="button" href="#" onclick="//finishGame()" disabled>Finish Game</button>
-                                <button class="button" href="#" onclick="//highlightSubs()" disabled>Highlight Subs</button>
-                            </p>
-                            <div class="field">
-                                <input id="autoSaveToggle" type="checkbox" name="autoSaveToggle" class="switch is-medium is-success"  @click="toggleAutoSave($el)">
-                                <label for="autoSaveToggle">Auto Save Game</label>
-                              </div>
-        
-                              <div class="field">
-                                <input id="autoHighlightSubsToggle" type="checkbox" name="autoHighlightSubsToggle" class="switch is-medium is-link" disabled>
-                                <label for="autoHighlightSubsToggle">Auto Highlight Subs</label>
-                              </div>
+                    <div class="row justify-content-around">
+                        <div class=" col-5">
+                            <button class="button" href="#" onclick="//finishGame()" disabled>Finish Game</button>
+                       
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="btnradio" id="autoSaveOff" autocomplete="off" @click="toggleAutoSave($el)">
+                                <label class="btn btn-outline-danger" for="autoSaveOff">Off</label>
+                              
+                                <button class="btn btn-outline-primary" @click="saveGame()">Auto Save Game</button>
+                              
+                                <input type="radio" class="btn-check" name="btnradio" id="autoSaveOn" autocomplete="off" @click="toggleAutoSave($el)">
+                                <label class="btn btn-outline-success" for="autoSaveOn">On</label>
+                            </div>
+
                         </div>
+                        <div class=" col-5">
+                                <button class="button" href="#" onclick="//highlightSubs()" disabled>Highlight Subs</button>
+                                <div class="field">
+                                    <input id="autoHighlightSubsToggle" type="checkbox" name="autoHighlightSubsToggle" class="switch is-medium is-link" disabled>
+                                    <label for="autoHighlightSubsToggle">Auto Highlight Subs</label>
+                                  </div>
+
                     </div>
     
                 <hr>
     
     
-                <div class="row">
+                <div class="row justify-content-around">
     
                     <div class="card col-5">
                         <div class="card-body">
@@ -232,14 +231,14 @@
                             </h1>
                           </p>
                           <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" @click="console.log('Game Clock')" checked>
+                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" @click="toggleGameClock($el)">
                             <label class="form-check-label" for="flexSwitchCheckChecked">Game Clock Toggle</label>
                           </div>                          
                         </div>
                       </div>
 
 
-                      <div class="card offset-2 col-5">
+                      <div class="card col-5">
                         <div class="card-body">
                           <h5 class="card-title">Game Score</h5>
                           <h6 class="card-subtitle mb-2 text-muted">Current Game Score</h6>
@@ -259,20 +258,27 @@
                 <div class="columns">
                     <div class="column">
     
-                    <table class="table is-fullwidth is-striped" >
+                    <table class="table table-striped" >
                         <thead>
                           <tr>
-                            <th><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center">Name</div></th>
-                            <th><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center">Goals</div></th>
-                            <th><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center">Time</div></th>
+                            <th><div class="">Name</div></th>
+                            <th><div class="">Goals</div></th>
+                            <th><div class="">Time</div></th>
+                            <th></th>
                           </tr>
                         </thead>
                         <tbody id="playerTable">
                             <template x-for="player in players">
                                 <tr>
                                     <td><span x-text="player.number"></span>: <span x-text="player.name"></span></td>
-                                    <td><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center"><span x-text="player.goals"></span> <button class="button" @click="addPlayerScore(player.id)">Add Goal</button></div></td>
-                                    <td><div class="is-flex is-justify-content-space-around is-align-content-center is-align-items-center"><span x-text="player.time"></span> <button class="button" @click="togglePlayerTimer(player.id)">Flip Timer</button></div></td>
+                                    <td><div class="justify-content-around"><span x-text="player.goals"></span> - <button class="btn btn-primary" @click="addPlayerScore(player.id)">Add Goal</button></div></td>
+                                    <td><span x-text="player.time"></span></td>
+                                    <td>
+                                        <div class="form-check form-switch" x-data="{ id: $id('player') }">
+                                            <input class="form-check-input" type="checkbox" role="switch" :id="$id('player')" @click="togglePlayerTimer(player.id)">
+                                            <label class="form-check-label" :for="$id('player')">Sub Player In</label>
+                                        </div> 
+                                    </td>
                                 </tr>
                             </template>
                         </tbody>
@@ -281,22 +287,25 @@
             </div>
     
                 <hr>
-    
-                <table id="" class="table is-fullwidth has-text-centered">
-                    <thead></thead>
-                    <tbody id="gameAuditLog">
+                <template x-if="currentGame.auditLog">
+                    <div>
+                        <table id="" class="table is-fullwidth has-text-centered">
+                            <thead></thead>
+                            <tbody id="gameAuditLog">
 
-                        <template x-for="(entry, index) in currentGame.auditLog.sort(auditLogSort)">
-                            <tr>
-                                <td x-text="parsePlayer(entry.player)"></td>
-                                <td x-text="entry.time"></td>
-                                <td><button @click="deleteAuditEntry(index)">Delete Event</button></td>
-                            </tr>
-                        </template>
+                                <template x-for="(entry, index) in currentGame.auditLog.sort(auditLogSort)">
+                                    <tr>
+                                        <td x-text="parsePlayer(entry.player)"></td>
+                                        <td x-text="entry.time"></td>
+                                        <td><button @click="deleteAuditEntry(index)">Delete Event</button></td>
+                                    </tr>
+                                </template>
 
-                    </tbody>
-                 
-                </table>
+                            </tbody>
+                        
+                        </table>
+                    </div>
+                </template>
             </div>
             </template>
 
@@ -810,7 +819,9 @@
 
                 this.scoreboardSync = setInterval(() => this.updateScoreboard(), this.refreshSpeed);
 
-                
+                if (this.currentGame.auditLog == null){
+                    this.currentGame.auditLog = [];
+                }
 
                 if (this.pb.authStore.isValid){
                     if (currentGame.expand.team.user == this.pb.authStore.model.id){
