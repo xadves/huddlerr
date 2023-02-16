@@ -1,9 +1,6 @@
 <html>
     <head>
-        <script src="/legacy/res/axios.min.js"></script>
-        <link rel="stylesheet" href="/legacy/res/font-awesome.min.css">
-
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+	<link href="/res/bootstrap@5.3.0.min.css" rel="stylesheet">
 
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +25,7 @@
                         <li class="nav-item"><a class="nav-link" href="#" x-show="validLogin" @click="teamManagement()">Manage Teams</a></li>
                     </ul>
 
-                    <button class="btn btn-outline-danger" x-show="!validLogin">Sign Up</button>
+                    <button class="btn btn-outline-danger" x-show="!validLogin" disabled>Sign Up</button>
                     <button class="btn btn-outline-success" x-show="!validLogin" @click="modals.login = true; console.log('opening login')" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
                     <button type="button" class="btn btn-danger" x-show="validLogin" @click="logout()">Log Out</button>
 
@@ -78,8 +75,7 @@
 
             <!-- Login Page (Modal) -->
                 <div class="modal fade" id="loginModal">
-
-                <div class="modal-dialog">
+                  <div class="modal-dialog">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h5 class="modal-title">Log into Huddlerr</h5>
@@ -168,7 +164,7 @@
             <!-- Team Game List -->
             <template x-if="show.teamGameList">
                 <div>
-                    Team Game List <button href="/?team={this.teamID}">Link to This Team</button> <button @click="createGame(teamID)" x-show="validLogin">Create Game</button>
+                    <a class="" :href="'/?team=' + teamID">Link to This Team</a> <button class="btn btn-outline-primary" @click="createGame(teamID)" x-show="validLogin">Create Game</button>
                     <table id="" class="table table-striped">
                         <thead>
                             <tr>
@@ -187,7 +183,7 @@
                                     <td x-text="game.homeScore"></td>
                                     <td x-text="game.awayScore"></td>
                                     <td x-text="game.gameTime"></td>
-                                    <td><button @click="selectGame(game.id)">View Game</button><button x-show="verifiedTeam">Control Game</button></td>
+                                    <td><button class="btn btn-outline-primary" @click="selectGame(game.id)">View Game</button></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -202,7 +198,7 @@
                 <div>
                     <div class="row justify-content-around">
                         <div class=" col-5">
-                            <button class="button" href="#" onclick="//finishGame()" disabled>Finish Game</button>
+                            <button class="btn btn-outline-primary" href="#" onclick="//finishGame()" disabled>Finish Game</button>
                        
                             <div class="btn-group" role="group">
                                 <input type="radio" class="btn-check" name="btnradio" id="autoSaveOff" autocomplete="off" @click="toggleAutoSave($el)">
@@ -322,11 +318,11 @@
             </div>
             </template>
 
-            <!-- Coach Controls -->
+            <!-- Team Management -->
             <template x-if="show.allowedTeamList">
                 <div>
-                    Team List <button @click="createTeam()">Add Team</button>
-                    <table id="" class="table is-fullwidth">
+                    <button class="btn btn-outline-primary" @click="createTeam()">Add Team</button>
+                    <table id="" class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Team</th>
@@ -338,7 +334,7 @@
                             <template x-for="team in teams">
                                 <tr>
                                     <td x-text="team.name"></td>
-                                    <td><button @click="findGames(team.id)">View Team Games</button> <button @click="managePlayers(team.id)">Manage Players</button> <button @click="editTeam(team.id)">Edit Team</button></td>
+                                    <td><button class="btn btn-outline-primary" @click="findGames(team.id)">View Team Games</button> <button class="btn btn-outline-primary" @click="managePlayers(team.id)">Manage Players</button> <button class="btn btn-outline-primary" @click="editTeam(team.id)">Edit Team</button></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -348,39 +344,76 @@
                 </div>
             </template>
 
-            <!-- Edit Team -->
-            <template x-if="show.editTeam">
-                <div>
-
-                      <div class="field">
-                        <label class="label">Team Name</label>
-                        <div class="control has-icons-left has-icons-right">
-                          <input class="input" type="text" placeholder="Team Name" x-model="team.name">
-                        </div>
-                      </div>
+            <!-- Edit Team (Modal)-->
 
 
-                      
-                      
-                      <div class="field is-grouped">
-                        <div class="control">
-                          <button class="button is-link" @click="updateTeam()">Update Team</button>
-                        </div>
-                        <div class="control">
-                            <button class="button is-link" @click="teamManagement()">Return</button>
-                        </div>
-                      </div>
+            <div class="modal fade" id="editTeamModal">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Edit Team <span x-text="currentTeam.name"></span></h5>
+                      <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
 
+                        <!-- Imported TODO : Verify -->
+                        <div class="field">
+                            <label class="label">Team Name</label>
+                            <div class="control has-icons-left has-icons-right">
+                              <input class="input" type="text" placeholder="Team Name" x-model="currentTeam.name">
+                            </div>
+                          </div>
 
-                    
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary" @click="updateTeam()">Update Team</button>
+                    </div>
+                  </div>
                 </div>
-            </template>
+              </div>
+
+              <!-- Edit Player (Modal) -->
+
+            <div class="modal fade" id="editPlayerModal">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Edit Team <span x-text="currentPlayer.name"></span></h5>
+                      <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <!-- Imported TODO : Verify this -->
+                        <div class="field">
+                            <label class="label">Player Number</label>
+                            <div class="control has-icons-left has-icons-right">
+                              <input class="input" type="text" placeholder="Player Number" x-model="currentPlayer.number"> <!-- Only allow numbers -->
+                            </div>
+                          </div>
+    
+                          <div class="field">
+                            <label class="label">Player Name</label>
+                            <div class="control has-icons-left has-icons-right">
+                              <input class="input" type="text" placeholder="Player Name" x-model="currentPlayer.name">
+                            </div>
+                          </div>
+
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary" @click="updatePlayer()">Update Player</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             
             <!-- Manage Players -->
             <template x-if="show.managePlayers">
                 <div>
-                    Player List <button @click="createPlayer(currentTeamID)">Add Player</button>
-                    <table id="" class="table is-fullwidth">
+                    <button class="btn btn-outline-primary" @click="createPlayer(currentTeamID)">Add Player</button>
+                    <table id="" class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Player Number</th>
@@ -394,7 +427,7 @@
                                 <tr>
                                     <td x-text="player.number"></td>
                                     <td x-text="player.name"></td>
-                                    <td><button @click="editPlayer(player.id)">Edit Player</button></td>
+                                    <td><button class="btn btn-outline-primary" @click="editPlayer(player.id)">Edit Player</button></td>
                                 </tr>
                             </template>
                         </tbody>
@@ -404,57 +437,21 @@
                 </div>
             </template>
 
-            <!-- Edit Player -->
-            <template x-if="show.editPlayer">
-                <div>
-                
-                    <span x-text="player.name"></span>
-                    <span x-text="player.id"></span>
-                    <span x-text="player.team"></span>
-
-                    <button @click="managePlayers(player.team)">Return</button>
-
-                    <div class="field">
-                        <label class="label">Player Number</label>
-                        <div class="control has-icons-left has-icons-right">
-                          <input class="input" type="text" placeholder="Player Number" x-model="player.number">
-                        </div>
-                      </div>
-
-                      <div class="field">
-                        <label class="label">Player Name</label>
-                        <div class="control has-icons-left has-icons-right">
-                          <input class="input" type="text" placeholder="Player Name" x-model="player.name">
-                        </div>
-                      </div>
+            
 
 
-                      
-                      
-                      <div class="field is-grouped">
-                        <div class="control">
-                          <button class="button is-link" @click="updatePlayer()">Update Player</button>
-                        </div>
-                        <div class="control">
-                            <button class="button is-link" @click="managePlayers(player.team)">Return</button>
-                        </div>
-                      </div>
 
-
-                    
-                </div>
-            </template>
 
         </div>
 
     </body>
 </html>
 
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> <!-- Make sure to download this locally -->
+<script defer src="/res/alpinejs.min.js"></script> <!-- Make sure to download this locally -->
 
-<script src="/legacy/js/pocketbase.umd.js"></script>
+<script src="/res/pocketbase.umd.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+<script src="/res/bootstrap@5.3.0.bundle.min.js"></script>
 
 <script>
 
@@ -489,6 +486,7 @@
             refreshSpeed: 5000,
             scoreboardSync: 'undefined',
             players: [], activePlayers: [], reversePlayerKeyMap: [],
+            currentPlayer: {}, currentTeam: {name: "Default"},
             autoSave: false,
             gameClock: 'undefined',
             async init () {
@@ -645,12 +643,12 @@
                     console.log(err);
                 }
             },
-            async editTeam(teamID){
+            async editTeam(teamID){ // May not need this anymore
                 try {
                     if (this.pb.authStore.isValid){
                         const record = await this.pb.collection('teams').getOne(teamID, {});
-                        team = record;
-                        this.showLayer('editTeam');
+                        this.currentTeam = record;
+                        var t = new bootstrap.Modal(document.getElementById('editTeamModal')).show();
                     }
                 } catch (err) {
                     console.log(err);
@@ -659,8 +657,10 @@
             async updateTeam(){
                 try {
                     if (this.pb.authStore.isValid){
-                        const record = await this.pb.collection('teams').update(team.id, team);
+                        const record = await this.pb.collection('teams').update(this.currentTeam.id, this.currentTeam);
+                        bootstrap.Modal.getInstance(document.getElementById('editTeamModal')).hide();
                         this.teamManagement();
+                        this.currentTeam = {};
                     }
                 } catch (err) {
                     console.log(err);
@@ -676,12 +676,12 @@
                     console.log(err);
                 }
             },
-            async editPlayer(playerID){
+            async editPlayer(playerID){ // May not need this anymore
                 try {
                     if (this.pb.authStore.isValid){
                         const record = await this.pb.collection('players').getOne(playerID, {});
-                        player = record;
-                        this.showLayer('editPlayer');
+                        this.currentPlayer = record;
+                        var t = new bootstrap.Modal(document.getElementById('editPlayerModal')).show();
                     }
                 } catch (err) {
                     console.log(err);
@@ -690,8 +690,11 @@
             async updatePlayer(){
                 try {
                     if (this.pb.authStore.isValid){
-                        const record = await this.pb.collection('players').update(player.id, player);
-                        this.managePlayers(player.team);
+                        const record = await this.pb.collection('players').update(this.currentPlayer.id, this.currentPlayer);
+                        //
+                        this.managePlayers(this.currentPlayer.team);
+                        this.currentPlayer = {};
+                        bootstrap.Modal.getInstance(document.getElementById('editPlayerModal')).hide();
                     }
                 } catch (err) {
                     console.log(err);
