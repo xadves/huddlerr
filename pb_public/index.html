@@ -277,11 +277,11 @@
                                     <td><span x-text="player.number"></span>: <span x-text="player.name"></span></td>
                                     <td><div class="justify-content-around"><span x-text="player.goals"></span><button class="btn btn-primary mx-3" @click="addPlayerScore(player.id)">Add Goal</button></div></td>
                                     <td>
-                                        <div class="progress">
+                                        <div class="progress" x-show="debug">
                                             <div class="progress-bar" role="progressbar" aria-label="Player in Time" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </td>
-                                    <td><span x-text="player.time"></span></td>
+                                    <td>(<strong x-text="sigTime(player.time)"></strong>) <span x-text="formatTime(player.time)"></span></td>
                                     <td>
                                         <div class="form-check form-switch" x-data="{ id: $id('player') }">
                                             <input class="form-check-input" type="checkbox" role="switch" :id="$id('player')" @click="togglePlayerTimer(player.id)">
@@ -298,15 +298,14 @@
                 <hr>
                 <template x-if="currentGame.auditLog">
                     <div>
-                        <table id="" class="table is-fullwidth has-text-centered">
+                        <table id="" class="table justify-content-center">
                             <thead></thead>
                             <tbody id="gameAuditLog">
 
                                 <template x-for="(entry, index) in currentGame.auditLog.sort(auditLogSort)">
-                                    <tr>
-                                        <td x-text="parsePlayer(entry.player)"></td>
-                                        <td x-text="entry.time"></td>
-                                        <td><button @click="deleteAuditEntry(index)">Delete Event</button></td>
+                                    <tr class="">
+                                        <td><span x-text="parsePlayer(entry.player)"></span> scored a goal at <span x-text="formatTime(entry.time)"></span>.</td>
+                                        <td><button class="btn btn-outline-danger" @click="deleteAuditEntry(index)">Delete Event</button></td>
                                     </tr>
                                 </template>
 
@@ -549,7 +548,11 @@
 
             },
             async gameList(){
+                var date = new Date();
+                date.setDate(date.getDate() - 1);
+
                 const games = await this.pb.collection('games').getFullList(200 , {
+                    filter: 'updated >= "' + date.toJSON() + '"',
                     sort: '-created',
                     expand: "team"
                 });
@@ -864,7 +867,7 @@
                 var currentPlayers = this.players;
                 currentPlayers.sort((a,b) => {return b.time - a.time});
 
-                // Check if the player is in
+                // Check if the player is in. We have the active players array.
 
                 // ...
 
@@ -905,6 +908,21 @@
             }
         }))
       })
+
+
+function sigTime(time){
+
+    var temp = "";
+
+    var minutes = Math.floor(time/60);
+
+    var sig = Math.floor(minutes/5);
+
+    temp = sig;
+
+
+    return temp;
+}
 
 // This is in a common functions page, staying here for testing purposes for now
 function formatTime(time){
