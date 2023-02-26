@@ -35,8 +35,9 @@ This project is being converted from a live php/js environment on a dev server t
 - [ ] Potentially Make Games Linkable instead of just teams
 
 ## Changelog
+- 2023-02-25 - Found and was able to restore the changelog from the 15th.
 - 2023-02-16 - Found the changes to the README were not saved, most likely user error. Past day updates are from memory. Created and tested player/team modals. Changed the scope of the variables so that they no longer conflict. Correctly themed all the remaining buttons. Fixed the "Link to Team" link. Added significant digits to player in time. Set the filter on 'main page' to updated >= yesterday. Made progress to the audit log section in the controls.
-- 2023-02-15 - Setup Login Modal, updated scoreboard interface, started implementing the highlight players back.
+- 2023-02-15 - Changed Auto save to happen every mod 5 seconds. Implemented Modal for Login screen. Login errors are still an alert, this needs to be changed. Removed 'All Games' placeholder. Formatted dates in all and team games. Cleaned up Scoreboard interface. Added the first piece of highlighting subs and their progress bar. Pruned some of the legacy files.
 - 2023-02-14 - Built more into the Bootstrap interface. Fixed the issue with mobile being small (meta viewport is a thing). Added switches to players sub in, testing out the "autosave" button/radio group (not working), fixed the navbar to look correct. Shrunk the columns from 12 to 10 and used justify around. I still don't love how the "control panel" area looks and I would like it to integrate more seemlessly into the design.
 - 2023-02-13 - Started the transition from Bulma to Bootstrap. I have not pruned the CSS and JS files that are not going to be used, and currently using a CDN for about half of the content. I already likethe interface better, and I know how to manipulate this better.
 - 2023-02-12 - Built the whole basics of the page with most of the basic functionality from the legacy version.
