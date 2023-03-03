@@ -33,8 +33,11 @@ This project is being converted from a live php/js environment on a dev server t
 - [ ] Resolve Source Map Errors. Is this only for Firefox dev?
 - [ ] Only allow numbers in player modal
 - [ ] Potentially Make Games Linkable instead of just teams
+- [ ] Add 'Enter' Support to Login
+- [ ] Logout takes you back home
 
 ## Changelog
+- 2023-03-03 - Discovered a bug where multiple user creating teams locks up the app and unable to create players on either team until one is deleted. Found the issue to be permissions related in the pocketbase side.
 - 2023-02-25 - Found and was able to restore the changelog from the 15th.
 - 2023-02-16 - Found the changes to the README were not saved, most likely user error. Past day updates are from memory. Created and tested player/team modals. Changed the scope of the variables so that they no longer conflict. Correctly themed all the remaining buttons. Fixed the "Link to Team" link. Added significant digits to player in time. Set the filter on 'main page' to updated >= yesterday. Made progress to the audit log section in the controls.
 - 2023-02-15 - Changed Auto save to happen every mod 5 seconds. Implemented Modal for Login screen. Login errors are still an alert, this needs to be changed. Removed 'All Games' placeholder. Formatted dates in all and team games. Cleaned up Scoreboard interface. Added the first piece of highlighting subs and their progress bar. Pruned some of the legacy files.
