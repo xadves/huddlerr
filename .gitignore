@@ -1,5 +1,6 @@
 # Ignore Pocketbase
 pocketbase_0.12.2_linux
+pocketbase.exe
 
 # Ignore PB_Data and PB_Migrate
 pb_data/

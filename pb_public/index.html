@@ -87,7 +87,7 @@
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="modals.login = false" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="handleLogin('loginModal')">Login</button>
+                        <button type="button" class="btn btn-primary" @click="handleLogin('loginModal')" @keyup.enter="handleLogin('loginModal')">Login</button>
                       </div>
                     </div>
                   </div>
@@ -102,6 +102,7 @@
                             <div class="text-center">
                                 <h2 x-text="currentGame.expand.team.name"></h2>
                                 <h4 x-text="formatDate(currentGame.date)"></h4>
+                                <a class="" :href="'/?game=' + currentGame.id">Link to This Game</a>
                             </div>
                         </div>
                     </div>
@@ -472,7 +473,7 @@
             }
         }),
         Alpine.data('mainPage', () => ({
-            debug: false,
+            debug: true,
             games: [],
             pb: null,
             show: {},
@@ -494,12 +495,22 @@
 
                 this.validLogin = this.pb.authStore.isValid;
 
-                var team = getSession();
-                if (team == null){
-                    this.gameList();
-                } else {
+                // There is a better way to do this
+
+                var team = getTeam();
+                if (team != null){
                     // pull team games
                     this.findGames(team);
+                }
+
+                var linkedGame = getGame();
+                if (linkedGame != null){
+                    // Open the game
+                    this.selectGame(linkedGame);
+                }
+                
+                if ((team == null) && (linkedGame == null)){
+                    this.gameList();
                 }
 
             },
@@ -550,16 +561,34 @@
                 var date = new Date();
                 date.setDate(date.getDate() - 1);
 
+                var year = date.getFullYear();
+                var month = date.getMonth() + 1;
+                var day = date.getDate();
+
+                month.toString().padStart(2, "0");
+
+                var filterDate = year + '-' + month + '-' + day;
+
+                /*
                 const games = await this.pb.collection('games').getFullList(200 , {
-                    filter: 'updated >= "' + date.toJSON() + '"',
+                    filter: 'updated >= "' + filterDate + '"',
                     sort: '-created',
                     expand: "team"
                 });
+                */
+
+                const games = await this.pb.collection('games').getFullList(200 , {
+                    sort: '-created',
+                    expand: "team"
+                });
+
                 this.games = games;
 
                 if (this.debug){
                     console.log("[*] Retrieve Games");
                     console.log(games);
+                    console.log(date.toJSON());
+                    console.log(filterDate);
                 }
                 this.showLayer("allGames");
             },
@@ -953,12 +982,22 @@ function formatDate(d){
     return temp.toDateString();
 }
 
-function getSession(){
+function getTeam(){
 
 // We need to do input validation on this
 
     var url = new URL(window.location.href);
     var c = url.searchParams.get("team");
+    return c;
+
+}
+
+function getGame(){
+
+// We need to do input validation on this
+
+    var url = new URL(window.location.href);
+    var c = url.searchParams.get("game");
     return c;
 
 }
