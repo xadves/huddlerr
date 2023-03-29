@@ -40,6 +40,7 @@ This project is being converted from a live php/js environment on a dev server t
 - [ ] Find a way to parse the players in the scoreboard
 
 ## Changelog
+- 2023-03-29 - Updated Public Scoreboard to show players who scored.
 - 2023-03-22 - Added pressing enter to login prompt(Not working as expected?). Made games linkable. Removed the updated filter in all games until that bug is resolved.
 - 2023-03-03 - Discovered a bug where multiple user creating teams locks up the app and unable to create players on either team until one is deleted. Found the issue to be permissions related in the pocketbase side. Completely hid the progressbar unless debug is checked. Fixed the auto save to actually save the game every %5. Discovered a bug where the not-yet-implemented highlight players button sorts the players based on time, but does not move the checkbox. Creates some weird behavior on edge cases of no players subbed in etc. Hiding the button into debug mode for now. Discovered a bug where the radio button for auto save is not consistent. Changed the button to be stateful on x-bind from Alpine instead.
 - 2023-02-25 - Found and was able to restore the changelog from the 15th.

@@ -524,6 +524,8 @@
                 try {                
                     if (player != '000000'){
                         return this.players[this.reversePlayerKeyMap[player]].name;
+                    } else if (player == '000000'){
+                        return "Opponent";
                     } else {
                         return player;
                     }
@@ -878,6 +880,36 @@
                         console.log("This user is allowed to control this game");
                     }
                 }
+
+                // Stitched this in to get players in the scoreboard
+
+                this.players = [];
+                const players = await this.pb.collection('players').getFullList(200, {
+                    sort: '-number',
+                    filter: 'team="'+ this.currentGame.team +'"'
+                })
+                
+                var keys = {};
+                for (let i in players){
+                    keys[players[i].id] = i;
+                    players[i].time = 0;
+                    players[i].goals = 0;
+                }
+
+                if (this.currentGame.auditLog == null){
+                    this.currentGame.auditLog = [];
+                }
+
+                if (this.currentGame.gameData){
+                    for (let i in this.currentGame.gameData.players){
+                        players[keys[i]].time = this.currentGame.gameData.players[i];
+                    }
+                }
+
+                this.players = players;
+                this.reversePlayerKeyMap = keys;
+
+                // End of stitch. Verify that all the pieces are needed.
 
                 if (this.debug){
                     console.log("[v] Game ID: ");
