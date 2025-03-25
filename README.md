@@ -3,7 +3,7 @@ Coaching Assistant App. Made to display a scoreboard to viewers in a simplified 
 
 ### Setup
 - Clone this repo into a new folder like C:\huddler
-- Download the OS specific version [Pocketbase 0.12.2]() or binary equivalent
+- Download the OS specific version [Pocketbase 0.12.2]() or binary equivalent.
 - run `.\pocketbase serve`
 - Return to http://yourdomain.com:port/_ in order to set an admin user name and password. 
 
