@@ -3,9 +3,9 @@ Coaching Assistant App. Made to display a scoreboard to viewers in a simplified 
 
 ### Setup
 - Clone this repo into a new folder like C:\huddler
-- Download the OS specific version [Pocketbase 0.12.2]() or binary equivelent
+- Download the OS specific version [Pocketbase 0.12.2]() or binary equivalent
 - run `.\pocketbase serve`
-- Return to http://yourdomain.com:port/_ in order to set an admin user name and password. This is currently the 
+- Return to http://yourdomain.com:port/_ in order to set an admin user name and password. 
 
 Read Pocketbase documentation for moving a setup into production. Mine is run behind Caddy as a reverse proxy.
 
@@ -20,6 +20,12 @@ This project is being converted from a live php/js environment on a dev server t
 [Mikepicker on Medium](https://medium.com/@Mikepicker/build-a-multi-user-todo-list-app-with-pocketbase-in-a-single-html-file-8734bfb882fd) - This looks extremely helpful for getting started with this project
 
 ### Todo, not an exhaustive list.
+- [ ] Highlight players and set their positions to show on the scoreboard.
+- [ ] Hide players that are not currently this game.
+- [ ] Health check that the timers are all assigned to the correct player and things didnt get flipped around.
+- [ ] Correct modals for what they are editing.
+- [ ] Create a docker compose file.
+- [x] Dockerize the application
 - [x] Localize the CSS/JS files.
 - [x] Change smaller functions from entire pages to modals.
 - [x] Repair the basic interface to working status.
@@ -33,13 +39,14 @@ This project is being converted from a live php/js environment on a dev server t
 - [x] Create Edit Team and Edit Player Modals
 - [ ] Resolve Source Map Errors. Is this only for Firefox dev?
 - [ ] Only allow numbers in player modal
-- [ ] Potentially Make Games Linkable instead of just teams
+- [x] Potentially Make Games Linkable instead of just teams
 - [ ] Add 'Enter' Support to Login
 - [x] Logout takes you back home
 - [ ] Empty the credentials modal after logging in
 - [ ] Find a way to parse the players in the scoreboard
 
 ## Changelog
+- 2025-03-25 - Dockerized the application
 - 2023-03-29 - Updated Public Scoreboard to show players who scored.
 - 2023-03-22 - Added pressing enter to login prompt(Not working as expected?). Made games linkable. Removed the updated filter in all games until that bug is resolved.
 - 2023-03-03 - Discovered a bug where multiple user creating teams locks up the app and unable to create players on either team until one is deleted. Found the issue to be permissions related in the pocketbase side. Completely hid the progressbar unless debug is checked. Fixed the auto save to actually save the game every %5. Discovered a bug where the not-yet-implemented highlight players button sorts the players based on time, but does not move the checkbox. Creates some weird behavior on edge cases of no players subbed in etc. Hiding the button into debug mode for now. Discovered a bug where the radio button for auto save is not consistent. Changed the button to be stateful on x-bind from Alpine instead.
